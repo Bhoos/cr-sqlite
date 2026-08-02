@@ -5,8 +5,9 @@ CC:=$(CI_GCC)
 endif
 
 # SHARED_CFLAGS=-DLIBSQL=1
-LOADABLE_CFLAGS=-std=c99 -fPIC -shared -Wall $(SHARED_CFLAGS)
-STATIC_CFLAGS=-std=c99 -fPIC -c -Wall $(SHARED_CFLAGS)
+PIC_CFLAG=-fPIC
+LOADABLE_CFLAGS=-std=c99 $(PIC_CFLAG) -shared -Wall $(SHARED_CFLAGS)
+STATIC_CFLAGS=-std=c99 $(PIC_CFLAG) -c -Wall $(SHARED_CFLAGS)
 # libsql_feature=,libsql
 
 ifeq ($(shell uname -s),Darwin)
@@ -41,6 +42,12 @@ ifeq ($(CI_MAYBE_TARGET),x86_64-pc-windows-gnu)
 C_TARGET=
 LOADABLE_EXTENSION=dll
 rs_build_flags = -Zbuild-std
+endif
+ifeq ($(CI_MAYBE_TARGET),aarch64-pc-windows-msvc)
+C_TARGET=--target=aarch64-pc-windows-msvc
+LOADABLE_EXTENSION=dll
+# Windows code is always position independent, clang rejects -fPIC there.
+PIC_CFLAG=
 endif
 
 ifdef IOS_TARGET
@@ -161,6 +168,14 @@ ifdef CI_MAYBE_TARGET
 			C_TARGET = --target=$(CI_MAYBE_TARGET)ulator
 		endif
 	endif
+endif
+
+# MSVC targets emit crsql_<bundle>.lib rather than libcrsql_<bundle>.a
+ifeq ($(findstring windows-msvc,$(CI_MAYBE_TARGET)),windows-msvc)
+	rs_lib_static = ./rs/$(bundle)/target/$(CI_MAYBE_TARGET)/release/crsql_$(bundle).lib
+	rs_lib_static_cpy = ./dist/crsql_$(bundle)-static.lib
+	rs_lib_loadable = ./rs/$(bundle)/target/$(CI_MAYBE_TARGET)/release/crsql_$(bundle).lib
+	rs_lib_loadable_cpy = ./dist/crsql_$(bundle)-loadable.lib
 endif
 
 $(shell.c):
