@@ -3,6 +3,12 @@
 # a hacky script to make all the various ios targets.
 # once we have something consistently working we'll streamline all of this.
 
+set -euo pipefail
+
+# bindgen hands the rust triple to clang, which rejects `sim` as a version.
+# clang spells the same target `arm64-apple-ios-simulator`.
+export BINDGEN_EXTRA_CLANG_ARGS_aarch64_apple_ios_sim="--target=arm64-apple-ios-simulator"
+
 BUILD_DIR=./build
 DIST_PACKAGE_DIR=./dist
 
