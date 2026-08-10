@@ -6,7 +6,7 @@ endif
 
 # SHARED_CFLAGS=-DLIBSQL=1
 PIC_CFLAG=-fPIC
-LOADABLE_CFLAGS=-std=c99 $(PIC_CFLAG) -shared -Wall $(SHARED_CFLAGS)
+LOADABLE_CFLAGS=-std=c99 $(PIC_CFLAG) $(APPLE_LDFLAGS) -shared -Wall $(SHARED_CFLAGS)
 STATIC_CFLAGS=-std=c99 $(PIC_CFLAG) -c -Wall $(SHARED_CFLAGS)
 # libsql_feature=,libsql
 
@@ -20,6 +20,9 @@ endif
 
 ifdef CONFIG_DARWIN
 LOADABLE_EXTENSION=dylib
+# Consumers that relocate the dylib rewrite its install name, which needs spare
+# room in the header. install_name_tool fails on long paths without this.
+APPLE_LDFLAGS=-headerpad_max_install_names
 # apparently `darwin-x86_64` also works on arm macs and is the proper host arch for ndk builds.
 NDK_HOSTARCH=darwin-x86_64
 endif
@@ -66,6 +69,8 @@ endif
 ifdef ANDROID_TARGET
 CI_MAYBE_TARGET=$(ANDROID_TARGET)
 NDK=$(ANDROID_NDK_HOME)
+# Building for android from a mac host, the linker is the NDK's, not Apple's.
+APPLE_LDFLAGS=
 LOADABLE_EXTENSION=so
 CC=$(NDK)/toolchains/llvm/prebuilt/$(NDK_HOSTARCH)/bin/clang
 rs_ndk=ndk -t $(ANDROID_TARGET)
