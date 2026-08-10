@@ -298,7 +298,7 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
           cd core
-          export ANDROID_TARGET=${{ matrix.rust_target }}; make loadable
+          export ANDROID_TARGET=${{ matrix.rust_target }}; make SHARED_CFLAGS="-Wl,-z,max-page-size=16384" loadable
           cd dist; zip crsqlite.zip ${{ matrix.library_name }}
 
       - name: Upload binaries to release
