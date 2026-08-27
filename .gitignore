@@ -1,0 +1,24 @@
+.DS_Store
+
+# https://yarnpkg.com/getting-started/qa/#which-files-should-be-gitignored
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+*.o
+
+/cache
+/debug
+/deps
+/tmp
+
+.DS_Store
+
+node_modules/
+.turbo/
+/dist-xl.zip
+/dist-xl
+/dist
