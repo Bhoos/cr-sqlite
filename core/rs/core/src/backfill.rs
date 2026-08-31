@@ -204,7 +204,7 @@ fn fill_column(
     // - the value is not the default value for that column.
     let dflt_value = get_dflt_value(db, table, &non_pk_col.name)?;
     let sql = format!(
-        "SELECT {pk_cols} FROM {table} as t1
+        "SELECT {pk_cols} FROM \"{table}\" as t1
           JOIN \"{table}__crsql_pks\" as t2 ON {pk_on_conditions}
           LEFT JOIN \"{table}__crsql_clock\" as t3 ON t3.key = t2.__crsql_key AND t3.col_name = ?
           WHERE t3.key IS NULL {dflt_value_condition}",
