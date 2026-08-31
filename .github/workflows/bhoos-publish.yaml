@@ -15,9 +15,9 @@ jobs:
         with:
           submodules: true
 
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: stable
+      - name: Rust Nightly
+        run: |
+          rustup toolchain install nightly-2023-10-05
 
       - name: Build
         run: |
@@ -25,62 +25,84 @@ jobs:
           echo "github.ref=${{github.ref}}"
           cd core
           ./build-all.sh
+          ls -lah
       
       - name: Create linux-android aarch64 zip
         working-directory: core
         run: |
-          cd dist; zip crsqlite-aarch64-linux-android.zip crsqlite.so
+          cd dist; zip -r crsqlite-aarch64-linux-android.zip ./
+          pwd
+          ls -lah
       
       - name: Create aarch64-apple-ios zip
         working-directory: core
         run: |
-          cd dist-ios; zip crsqlite-aarch64-apple-ios.zip crsqlite-aarch64-apple-ios.dylib
+          cd dist-ios; zip -r crsqlite-aarch64-apple-ios.zip ./
+          pwd
+          ls -lah
       
       - name: Create aarch64-apple-ios-sim zip
         working-directory: core
         run: |
           cd dist-ios-sim; zip -r crsqlite-aarch64-apple-ios-sim.zip ./
+          pwd
+          ls -lah
 
       - name: Create android-arm64-v8a zip
         working-directory: core
         run: |
-          cd dist-android; zip -r crsqlite-android-arm65-v8a.zip ./
+          cd dist-android; zip -r crsqlite-android-arm64-v8a.zip ./arm64-v8a
+          pwd
+          ls -lah
           
       - name: Create android-x86_64 zip
         working-directory: core
         run: |
-          cd dist-android; zip -r crsqlite-android-x86_64.zip ./
+          cd dist-android; zip -r crsqlite-android-x86_64.zip ./x86_64
+          pwd
+          ls -lah
 
       - name: Create xcframework zip
         working-directory: core
         run: |
           cd build; zip -r crsqlite-xcframework.zip ./crsqlite.xcframework
+          pwd
+          ls -lah
 
       - name: Create wasam zip
         working-directory: core
         run: |
           cd build; zip -r crsqlite-wasm.zip ./wasm
+          pwd
+          ls -lah
           
       - name: Upload binaries to release
         working-directory: core
         run: |
+          tag=$(echo ${{ github.ref }} | awk -F'/' '{print $3}')
+          echo "tag=$tag"
+          pwd
+
           echo "crsqlite-aarch64-linux-android.zip"
-          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber dist/crsqlite.zip
+          gh release upload -R ${{ github.repository }} $tag --clobber ./dist/crsqlite-aarch64-linux-android.zip
           
           echo "crsqlite-aarch64-apple-ios.zip"
-          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber dist-ios/crsqlite-aarch64-apple-ios.zip
+          gh release upload -R ${{ github.repository }} $tag --clobber ./dist-ios/crsqlite-aarch64-apple-ios.zip
           
           echo "crsqlite-aarch64-apple-ios-sim.zip"
-          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber dist-ios-sim/crsqlite-aarch64-apple-ios-sim.zip
+          gh release upload -R ${{ github.repository }} $tag --clobber ./dist-ios-sim/crsqlite-aarch64-apple-ios-sim.zip
 
           echo "crsqlite-xcframework.zip"
-          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber build/crsqlite-xcframework.zip
+          gh release upload -R ${{ github.repository }} $tag --clobber ./build/crsqlite-xcframework.zip
           
           echo "crsqlite-android-arm64-v8a.zip"
-          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber dist-android/crsqlite-android-arm65-v8a.zip
+          gh release upload -R ${{ github.repository }} $tag --clobber ./dist-android/crsqlite-android-arm64-v8a.zip
 
           echo "crsqlite-android-x86_64.zip"
-          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber dist-android/crsqlite-android-x86_64.zip
+          gh release upload -R ${{ github.repository }} $tag --clobber ./dist-android/crsqlite-android-x86_64.zip
 
           echo "crsqlite-wasm.zip"
-          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber build/crsqlite-wasm.zip
+          gh release upload -R ${{ github.repository }} $tag --clobber ./build/crsqlite-wasm.zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          
