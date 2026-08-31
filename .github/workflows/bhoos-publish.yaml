@@ -1,0 +1,78 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  prebuild:
+    name: Custom Build for cr-sqlite
+    runs-on: self-hosted
+            
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build
+        run: |
+          echo "github.repository=${{github.repository}}"
+          echo "github.ref=${{github.ref}}"
+          cd core
+          ./build-all.sh
+      
+      - name: Create linux-android aarch64 zip
+        run: |
+          cd dist; zip crsqlite-aarch64-linux-android.zip crsqlite.so
+      
+      - name: Create aarch64-apple-ios zip
+        run: |
+          cd dist-ios; zip crsqlite-aarch64-apple-ios.zip crsqlite-aarch64-apple-ios.dylib
+      
+      - name: Create aarch64-apple-ios-sim zip
+        run: |
+          cd dist-ios-sim; zip -r crsqlite-aarch64-apple-ios-sim.zip ./
+
+      - name: Create android-arm64-v8a zip
+        run: |
+          cd dist-android; zip -r crsqlite-android-arm65-v8a.zip ./
+          
+      - name: Create android-x86_64 zip
+        run: |
+          cd dist-android; zip -r crsqlite-android-x86_64.zip ./
+
+      - name: Create xcframework zip
+        run: |
+          cd build; zip -r crsqlite-xcframework.zip ./crsqlite.xcframework
+
+      - name: Create wasam zip
+        run: |
+          cd build; zip -r crsqlite-wasm.zip ./wasm
+          
+      - name: Upload binaries to release
+        run: |
+          echo "crsqlite-aarch64-linux-android.zip"
+          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber core/dist/crsqlite.zip
+          
+          echo "crsqlite-aarch64-apple-ios.zip"
+          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber core/dist-ios/crsqlite-aarch64-apple-ios.zip
+          
+          echo "crsqlite-aarch64-apple-ios-sim.zip"
+          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber core/dist-ios-sim/crsqlite-aarch64-apple-ios-sim.zip
+
+          echo "crsqlite-xcframework.zip"
+          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber core/build/crsqlite-xcframework.zip
+          
+          echo "crsqlite-android-arm64-v8a.zip"
+          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber core/dist-android/crsqlite-android-arm65-v8a.zip
+
+          echo "crsqlite-android-x86_64.zip"
+          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber core/dist-android/crsqlite-android-x86_64.zip
+
+          echo "crsqlite-wasm.zip"
+          gh release upload -R ${{ github.repository }} ${{ github.ref }} --clobber core/build/crsqlite-wasm.zip

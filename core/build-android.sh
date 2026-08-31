@@ -4,8 +4,7 @@ rustup target add --toolchain nightly-2023-10-05 \
   armv7-linux-androideabi
 
 cargo install cargo-ndk
-export ANDROID_NDK_HOME="$HOME/Library/Android/sdk/ndk/27.0.11902837"
-export ANDROID_NDK_HOME="$HOME/Library/Android/sdk/ndk/27.0.11902837"
+export ANDROID_NDK_HOME="$HOME/Library/Android/sdk/ndk/27.1.12297006"
 LLVM_BIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/bin"
 
 make clean

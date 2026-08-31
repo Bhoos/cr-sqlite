@@ -1,10 +1,7 @@
 name: publish
 
 on:
-  push:
-    tags:
-      - "v*"
-      - "prebuild-test.*"
+  workflow_dispatch: {}
 
 jobs:
   prebuild:
