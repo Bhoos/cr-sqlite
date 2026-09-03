@@ -62,6 +62,20 @@ jobs:
           pwd
           ls -lah
 
+      - name: Create android-x86 zip
+        working-directory: core
+        run: |
+          cd dist-android; zip -r crsqlite-android-x86.zip ./x86
+          pwd
+          ls -lah
+      
+      - name: Create android-armeabi-v7a zip
+        working-directory: core
+        run: |
+          cd dist-android; zip -r crsqlite-android-armeabi-v7a.zip ./armeabi-v7a
+          pwd
+          ls -lah
+
       - name: Create xcframework zip
         working-directory: core
         run: |
@@ -100,6 +114,12 @@ jobs:
 
           echo "crsqlite-android-x86_64.zip"
           gh release upload -R ${{ github.repository }} $tag --clobber ./dist-android/crsqlite-android-x86_64.zip
+          
+          echo "crsqlite-android-x86.zip"
+          gh release upload -R ${{ github.repository }} $tag --clobber ./dist-android/crsqlite-android-x86.zip
+          
+          echo "crsqlite-android-armeabi-v7a.zip"
+          gh release upload -R ${{ github.repository }} $tag --clobber ./dist-android/crsqlite-android-armeabi-v7a.zip
 
           echo "crsqlite-wasm.zip"
           gh release upload -R ${{ github.repository }} $tag --clobber ./build/crsqlite-wasm.zip
