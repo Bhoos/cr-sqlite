@@ -106,23 +106,46 @@ rm -rf "${BUILD_DIR}"
 3. Android Build Process (libcrsqlite.so)
 Android 15+ and Google Play require 16KB page alignment. Pass -Wl,-z,max-page-size=16384 during the final link.
 Run from core/:
+```bash
 cd core
-export ANDROID_NDK_HOME="$HOME/Library/Android/sdk/ndk/27.0.11902837"
+./build-android.sh
+```
+
+Or manually:
+```bash
+cd core
+export ANDROID_NDK_HOME="$HOME/Library/Android/sdk/ndk/27.1.12297006"
 LLVM_BIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/bin"
 
-# 1. Build arm64-v8a
+# 1. Build armeabi-v7a
+make clean
+export ANDROID_TARGET=armv7-linux-androideabi
+make loadable CC="$LLVM_BIN/clang -Wl,-z,max-page-size=16384"
+mkdir -p ./dist-android/armeabi-v7a
+cp ./dist/crsqlite.so ./dist-android/armeabi-v7a/libcrsqlite.so
+
+# 2. Build arm64-v8a
 make clean
 export ANDROID_TARGET=aarch64-linux-android
 make loadable CC="$LLVM_BIN/clang -Wl,-z,max-page-size=16384"
 mkdir -p ./dist-android/arm64-v8a
 cp ./dist/crsqlite.so ./dist-android/arm64-v8a/libcrsqlite.so
 
-# 2. Build x86_64 (Emulator)
+# 3. Build x86
+make clean
+export ANDROID_TARGET=i686-linux-android
+make loadable CC="$LLVM_BIN/clang -Wl,-z,max-page-size=16384"
+mkdir -p ./dist-android/x86
+cp ./dist/crsqlite.so ./dist-android/x86/libcrsqlite.so
+
+# 4. Build x86_64
 make clean
 export ANDROID_TARGET=x86_64-linux-android
 make loadable CC="$LLVM_BIN/clang -Wl,-z,max-page-size=16384"
 mkdir -p ./dist-android/x86_64
 cp ./dist/crsqlite.so ./dist-android/x86_64/libcrsqlite.so
+```
+
 4. Integration into React Native / op-sqlite
 4.1 iOS Setup (Local Pod)
 1. Create a local pod directory at <AppRoot>/native/crsqlite:
@@ -150,7 +173,11 @@ end
 4.2 Android Setup (jniLibs)
 Copy the compiled .so files into android/app/src/main/jniLibs/:
 android/app/src/main/jniLibs/
+├── armeabi-v7a/
+│   └── libcrsqlite.so
 ├── arm64-v8a/
+│   └── libcrsqlite.so
+├── x86/
 │   └── libcrsqlite.so
 └── x86_64/
     └── libcrsqlite.so
